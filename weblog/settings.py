@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'posts',  # Custom app for handling posts
+    'posts',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
