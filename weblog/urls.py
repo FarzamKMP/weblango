@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from posts.views import post_list, index, post_detail
+from posts.views import post_list, post_detail
 from posts.api.api import AllIndex, index
 
 urlpatterns = [
