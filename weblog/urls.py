@@ -16,11 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from posts.views import post_list, index, post_detail, index
+from posts.views import post_list, index, post_detail, index, AllIndex
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('weblog/', post_list, name='post_list'),
     path('weblog/<int:post_id>/', post_detail, name='post_detail'),
-    path('api/weblog/', index, name='api_index'),
+    path('api/weblog/', AllIndex, name='api_index'),
+    path('api/weblog/<int:post_id>/', index, name='api_index'),
 ]

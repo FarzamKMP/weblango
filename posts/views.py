@@ -1,19 +1,23 @@
-from django.http import HttpResponse
 from .models import Post
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from .serializers import PostSerializer
 
 @api_view(['GET'])
-def index(request):
+def AllIndex(request):
+    posts = Post.objects.all()
+    serializer = PostSerializer(posts, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def index(request, post_id):
     try:
-        posts = Post.objects.all()
-        return Response({
-            'message': 'Welcome to the Weblog API',
-            'posts': [{'id': post.id, 'title': post.title} for post in posts]
-        })
+        posts = Post.objects.get(id=post_id)
+        serializer = PostSerializer(posts)
+        return Response(serializer.data)
     except Exception as e:
-        return Response({"Error": "Something went wrong"}, status=400)
+        return Response({'detail':'Post not exist'}, status=400)
 
 def post_list(request):
     posts = Post.objects.all()
