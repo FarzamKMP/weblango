@@ -17,12 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from posts.views import post_list, post_detail
-from posts.api.api import AllIndex, index
+from posts.api.api import AllIndex, index, create_comment
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('weblog/', post_list, name='post_list'),
     path('weblog/<int:post_id>/', post_detail, name='post_detail'),
+    path('api/weblog/<int:post_id>/comments/', create_comment, name='create_comment'),
     path('api/weblog/', AllIndex, name='api_index'),
     path('api/weblog/<int:post_id>/', index, name='api_index'),
 ]

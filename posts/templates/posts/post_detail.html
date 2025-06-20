@@ -1,9 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ post.title }}</title>
+    <style>
+            body {
+    font-family: Arial, sans-serif;
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 0 20px;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+h1, h2 {
+    color: #2c3e50;
+}
+
+p {
+    line-height: 1.6;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 30px 0;
+}
+
+#comments-container {
+    margin-bottom: 30px;
+}
+
+.comment {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+}
+
+.comment p {
+    margin: 5px 0;
+}
+
+form label {
+    font-weight: bold;
+    display: block;
+    margin-top: 15px;
+}
+
+form input[type="text"],
+form textarea {
+    width: 100%;
+    padding: 8px 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+form textarea {
+    min-height: 80px;
+}
+
+form button {
+    margin-top: 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+form button:hover {
+    background-color: #2980b9;
+}
+    </style>
 </head>
 <body>
     <h1>{{ post.title }}</h1>
@@ -13,12 +92,94 @@
     <p>Last updated: {{ post.updated_at }}</p>
 
     <hr>
-    {% for comment in post.comments.all %}
-        <div>
-            <p><strong>{{ comment.author }}</strong> said:</p>
-            <p>{{ comment.content }}</p>
-            <p>Commented on: {{ comment.created_at }}</p>
-        </div>
-    {% endfor %}
+    <h2>Comments</h2>
+    <div id="comments-container">
+        {% for comment in comments %}
+            <div class="comment">
+                <p><strong>{{ comment.author }}</strong> said:</p>
+                <p>{{ comment.content }}</p>
+                <p>Commented on: {{ comment.created_at }}</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <hr>
+    <h2>Leave a Comment:</h2>
+    <form id="comment-form" onsubmit="event.preventDefault(); postComment({{ post.id }});">
+        {% csrf_token %}
+        <label for="author">Name:</label>
+        <input type="text" id="author" name="author" required />
+        <br />
+        <label for="content">Comment:</label>
+        <textarea id="content" name="content" required></textarea>
+        <br />
+        <button type="submit">Submit</button>
+    </form>
+
+<script>
+    // تابع گرفتن کوکی CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i=0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    async function postComment(postId) {
+        const author = document.getElementById('author').value;
+        const content = document.getElementById('content').value;
+
+        if (!author || !content) {
+            alert("Please fill in all fields!");
+            return;
+        }
+
+        const csrftoken = getCookie('csrftoken');
+
+        try {
+            const response = await fetch(`/api/weblog/${postId}/comments/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({ author, content }),
+            });
+
+            if (response.ok) {
+                const newComment = await response.json();
+                addCommentToPage(newComment);
+                document.getElementById('comment-form').reset();
+            } else {
+                const errorData = await response.json();
+                console.error('Error posting comment:', errorData);
+                alert("Failed to post comment. Please try again.");
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert("Something went wrong. Please try again later.");
+        }
+    }
+
+    function addCommentToPage(comment) {
+        const commentsContainer = document.getElementById('comments-container');
+        const commentElement = document.createElement('div');
+        commentElement.classList.add('comment');
+        commentElement.innerHTML = `
+            <p><strong>${comment.author}</strong> said:</p>
+            <p>${comment.content}</p>
+            <p>Commented on: ${new Date(comment.created_at).toLocaleString()}</p>
+        `;
+        commentsContainer.appendChild(commentElement);
+    }
+</script>
 </body>
 </html>
