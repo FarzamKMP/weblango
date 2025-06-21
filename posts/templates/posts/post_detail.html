@@ -145,7 +145,7 @@ form button:hover {
         const csrftoken = getCookie('csrftoken');
 
         try {
-            const response = await fetch(`/api/weblog/${postId}/comments/`, {
+            const response = await fetch(`/weblog/api/${postId}/comments/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
